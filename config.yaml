@@ -1,0 +1,93 @@
+# Study Area Configuration
+# Queensland and NSW bounding boxes and administrative boundaries
+
+study_area:
+  name: "Eastern Australia Land Clearing"
+  description: "Queensland and New South Wales"
+  
+  # Bounding box for the entire study area (QLD + NSW)
+  # Format: [min_lon, min_lat, max_lon, max_lat]
+  bbox: [138.0, -38.0, 154.0, -10.0]
+  
+  # Individual state bounding boxes
+  states:
+    queensland:
+      name: "Queensland"
+      bbox: [138.0, -29.2, 154.0, -10.0]
+      epsg: 7856  # GDA2020 / MGA zone 56
+    
+    new_south_wales:
+      name: "New South Wales"
+      bbox: [140.9, -38.0, 153.6, -28.1]
+      epsg: 7856  # GDA2020 / MGA zone 56
+
+# Time Period Configuration
+time_period:
+  start_year: 1988
+  end_year: 2024
+  temporal_resolution: "annual"  # annual, seasonal, monthly
+  
+# Data Sources Configuration
+data_sources:
+  dea_land_cover:
+    name: "DEA Land Cover"
+    description: "Digital Earth Australia Land Cover"
+    url: "https://www.dea.ga.gov.au/products/dea-land-cover"
+    temporal_coverage: "1988-present"
+    spatial_resolution: "25m"
+    update_frequency: "annual"
+    
+  dea_fractional_cover:
+    name: "DEA Fractional Cover"
+    description: "Digital Earth Australia Fractional Cover"
+    url: "https://www.dea.ga.gov.au/products/dea-fractional-cover"
+    temporal_coverage: "1987-present"
+    spatial_resolution: "25m"
+    update_frequency: "monthly"
+    bands:
+      - "PV"  # Photosynthetic Vegetation
+      - "NPV"  # Non-Photosynthetic Vegetation
+      - "BS"  # Bare Soil
+    
+  slats:
+    name: "SLATS"
+    description: "Statewide Landcover and Trees Study (Queensland)"
+    url: "https://www.qld.gov.au/environment/land/management/mapping/statewide-monitoring/slats"
+    temporal_coverage: "1988-present"
+    spatial_resolution: "30m"
+    update_frequency: "biennial"
+    coverage: "Queensland only"
+
+# Output Configuration
+outputs:
+  formats:
+    - "GeoTIFF"
+    - "NetCDF"
+    - "PNG"
+    - "MP4"  # For animations
+  
+  animations:
+    fps: 2  # Frames per second
+    dpi: 300
+    duration: 10  # seconds
+    
+  figures:
+    dpi: 300
+    format: "png"
+    style: "seaborn-v0_8-darkgrid"
+
+# Processing Configuration
+processing:
+  chunk_size: 2048
+  dask_workers: 4
+  memory_limit: "8GB"
+  
+# Visualization Configuration
+visualization:
+  colormap: "RdYlGn"  # Red-Yellow-Green for vegetation
+  narrative_themes:
+    - "Agricultural expansion"
+    - "Urban development"
+    - "Vegetation regeneration"
+    - "Fire impacts"
+    - "Climate impacts"

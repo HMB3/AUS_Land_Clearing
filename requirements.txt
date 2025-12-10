@@ -1,0 +1,34 @@
+# Core scientific computing
+numpy>=1.21.0
+pandas>=1.3.0
+xarray>=0.19.0
+dask>=2021.8.0
+
+# Geospatial
+rasterio>=1.2.0
+geopandas>=0.9.0
+shapely>=1.7.0
+pyproj>=3.0.0
+fiona>=1.8.0
+
+# DEA and earth observation
+odc-stac>=0.3.0
+pystac-client>=0.3.0
+planetary-computer>=0.4.0
+datacube>=1.8.0
+
+# Visualization
+matplotlib>=3.4.0
+seaborn>=0.11.0
+plotly>=5.0.0
+imageio>=2.9.0
+pillow>=8.0.0
+
+# Notebooks
+jupyter>=1.0.0
+ipywidgets>=7.6.0
+
+# Utilities
+pyyaml>=5.4.0
+tqdm>=4.62.0
+requests>=2.26.0
