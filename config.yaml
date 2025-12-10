@@ -57,6 +57,26 @@ data_sources:
     spatial_resolution: "30m"
     update_frequency: "biennial"
     coverage: "Queensland only"
+  
+  gee_landsat:
+    name: "GEE Landsat Collection 2"
+    description: "Landsat 8/9 from Google Earth Engine"
+    url: "https://developers.google.com/earth-engine/datasets/catalog/LANDSAT_LC08_C02_T1_L2"
+    temporal_coverage: "2013-present (Landsat 8), 2021-present (Landsat 9)"
+    spatial_resolution: "30m"
+    update_frequency: "16-day revisit"
+    coverage: "Global"
+    cloud_processing: true
+    
+  gee_sentinel2:
+    name: "GEE Sentinel-2"
+    description: "Sentinel-2 MSI from Google Earth Engine"
+    url: "https://developers.google.com/earth-engine/datasets/catalog/COPERNICUS_S2_SR"
+    temporal_coverage: "2015-present"
+    spatial_resolution: "10m"
+    update_frequency: "5-day revisit"
+    coverage: "Global"
+    cloud_processing: true
 
 # Output Configuration
 outputs:

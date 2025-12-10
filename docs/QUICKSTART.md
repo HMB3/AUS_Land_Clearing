@@ -62,6 +62,39 @@ start_year, end_year = get_time_range()
 print(f"Analysis period: {start_year}-{end_year}")
 ```
 
+### Example 2: Using Google Earth Engine (Quickest Start)
+
+```python
+from aus_land_clearing.data import initialize_gee, load_gee_landsat_fc, export_gee_timeseries
+
+# First time: Authenticate GEE
+# Run in terminal: earthengine authenticate
+
+# Initialize GEE
+initialize_gee()
+
+# Load data from GEE (no local storage needed)
+data = load_gee_landsat_fc(
+    bbox=[138.0, -29.2, 154.0, -10.0],  # Queensland
+    time_range=('2020-01-01', '2023-12-31'),
+    cloud_cover=30
+)
+
+# Export time series
+ts = export_gee_timeseries(
+    data,
+    variable='NDVI',
+    output_path='ndvi_timeseries.csv'
+)
+
+print(f"Exported {len(ts)} observations")
+```
+
+**Note**: GEE is recommended for getting started quickly as it requires no local data downloads.
+start_year, end_year = get_time_range()
+print(f"Analysis period: {start_year}-{end_year}")
+```
+
 ### Example 2: Data Access (requires DEA setup)
 
 ```python
