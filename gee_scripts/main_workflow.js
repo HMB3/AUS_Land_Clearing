@@ -212,12 +212,18 @@ print('Go to the Tasks tab to start exports');
  * Export annual GeoTIFF frames
  */
 if (WORKFLOW_CONFIG.exportGeoTIFFs) {
+  // Get list of years to export
   var years = ee.List.sequence(
     parseInt(WORKFLOW_CONFIG.startYear),
     parseInt(WORKFLOW_CONFIG.endYear)
   );
   
-  years.getInfo().forEach(function(year) {
+  // Create export tasks for all years (executed server-side)
+  // Note: This creates the tasks but doesn't execute them yet
+  // You must manually run them from the Tasks tab
+  var exportYears = years.getInfo();  // Single getInfo() call
+  
+  exportYears.forEach(function(year) {
     var image = woodyTimeSeries.filter(ee.Filter.eq('year', year)).first();
     
     var filename = utils.generateFilename(
@@ -247,7 +253,7 @@ if (WORKFLOW_CONFIG.exportGeoTIFFs) {
     });
   });
   
-  print('GeoTIFF export tasks created');
+  print('GeoTIFF export tasks created for', exportYears.length, 'years');
 }
 
 /**

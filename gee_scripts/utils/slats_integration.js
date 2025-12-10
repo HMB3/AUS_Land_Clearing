@@ -16,6 +16,13 @@ var utils = require('../core/utils.js');
 /**
  * Load and filter SLATS clearing data by year range
  * 
+ * IMPORTANT: SLATS data schema requirements:
+ * - Property 'YEAR': Integer representing clearing year (required)
+ * - Property 'AREA': Clearing area in square meters (required for area calculations)
+ * 
+ * If your SLATS data uses different property names, adjust the filter accordingly.
+ * Common alternatives: 'year', 'Year', 'CLEARING_YEAR'
+ * 
  * @param {string} state - 'QLD' or 'NSW'
  * @param {string} sensor - 'Landsat' or 'Sentinel'
  * @param {ee.Geometry} region - Region of interest
@@ -26,7 +33,9 @@ var utils = require('../core/utils.js');
 exports.loadSLATSByYear = function(state, sensor, region, startYear, endYear) {
   var slats = utils.loadSLATS(state, sensor, region);
   
-  // Filter by year range (assumes 'YEAR' or 'year' property in features)
+  // Filter by year range (assumes 'YEAR' property in features)
+  // If your data uses a different property name (e.g., 'year', 'CLEARING_YEAR'),
+  // replace 'YEAR' below with the correct property name
   var filtered = slats.filter(
     ee.Filter.and(
       ee.Filter.gte('YEAR', startYear),

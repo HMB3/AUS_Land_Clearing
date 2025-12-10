@@ -101,9 +101,25 @@ exports.REGIONAL_DOMAINS = {
 /**
  * DEA Land Cover (Landsat) - Annual classifications
  * Available in GEE Community Catalog
+ * 
+ * SETUP INSTRUCTIONS:
+ * 1. Option A - Use GEE Community Catalog (if available):
+ *    Check https://developers.google.com/earth-engine/datasets for DEA products
+ * 
+ * 2. Option B - Upload your own data:
+ *    a. Download DEA Land Cover from https://knowledge.dea.ga.gov.au/
+ *    b. Upload to GEE using Asset Manager or Earth Engine CLI
+ *    c. Update ASSET_ID below with your asset path
+ * 
+ * 3. Verify band names match your data (print band names in Code Editor)
+ * 
+ * See docs/DATA_SOURCES.md for detailed instructions and data specifications.
  */
 exports.DEA_LAND_COVER = {
   // Replace with actual GEE asset path when available
+  // Examples:
+  //   'projects/dea-public/assets/land_cover'  (if in community catalog)
+  //   'projects/YOUR_PROJECT/assets/dea_land_cover'  (if you upload it)
   ASSET_ID: 'projects/YOUR_PROJECT/assets/dea_land_cover',
   BAND: 'level3',  // Land cover classification band
   START_YEAR: 1988,

@@ -14,6 +14,24 @@ var config = require('./config.js');
 /**
  * Load DEA Land Cover data for a given time period and region
  * 
+ * IMPORTANT: This is a placeholder function. You must:
+ * 1. Upload DEA Land Cover data to Google Earth Engine as an ImageCollection
+ * 2. Update the ASSET_ID in config.js with your actual asset path
+ * 3. Verify the band name matches your data (default: 'level3')
+ * 
+ * Expected ImageCollection structure:
+ * - Each image represents one year of land cover
+ * - Image property 'year' or 'system:time_start' indicates the year
+ * - Band contains land cover classification codes (see config.LAND_COVER_CLASSES)
+ * 
+ * Example for loading from GEE asset:
+ *   var collection = ee.ImageCollection(config.DEA_LAND_COVER.ASSET_ID)
+ *     .filterBounds(region)
+ *     .filterDate(startDate, endDate)
+ *     .select(config.DEA_LAND_COVER.BAND);
+ * 
+ * See docs/DATA_SOURCES.md for details on obtaining and uploading DEA data.
+ * 
  * @param {ee.Geometry} region - The geographic region of interest
  * @param {string} startDate - Start date (YYYY-MM-DD)
  * @param {string} endDate - End date (YYYY-MM-DD)
@@ -24,6 +42,7 @@ exports.loadDEALandCover = function(region, startDate, endDate) {
   // This is a placeholder structure
   
   print('Loading DEA Land Cover from', startDate, 'to', endDate);
+  print('WARNING: Using placeholder - update ASSET_ID in config.js with your data');
   
   // In practice, you would load from the GEE community catalog or uploaded asset:
   // var collection = ee.ImageCollection(config.DEA_LAND_COVER.ASSET_ID)
@@ -31,8 +50,7 @@ exports.loadDEALandCover = function(region, startDate, endDate) {
   //   .filterDate(startDate, endDate)
   //   .select(config.DEA_LAND_COVER.BAND);
   
-  // For now, return a placeholder that users can replace
-  // with the actual asset path
+  // Placeholder returns empty collection - replace with actual loading code above
   var collection = ee.ImageCollection([]);
   
   return collection;
