@@ -91,6 +91,93 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Added - Sweep 1: DEA Annual Landcover Processing
+
+#### Documentation and Metadata
+- Enhanced README.md with comprehensive DEA Annual Landcover processing documentation
+  - Overview of DEA annual landcover product
+  - Two processing routes (Python/ODC and Google Earth Engine JS)
+  - Step-by-step workflow instructions
+  - Required credentials and setup guides
+  - Class mapping table (DEA classes to woody/non-woody)
+  - Recommended implementation sweeps
+- Updated CONTRIBUTING.md with detailed guidance for:
+  - Running and writing tests for DEA processing
+  - Adding new data sources to the repository
+  - Creating processing functions with proper documentation
+  - Data quality validation patterns
+- Updated project structure documentation to reflect new directories and files
+
+#### Configuration and Area of Interest
+- Added DEA annual landcover processing profile to `config.yaml`:
+  - Product ID (`ga_ls_landcover_class_cyear_2`)
+  - Time period configuration (1988-2024)
+  - Coordinate reference system (EPSG:3577 - Australian Albers)
+  - Output resolution (25m)
+  - Class mapping for woody/non-woody reclassification
+  - AOI paths for NSW and QLD
+- Created `scripts/fetch_australian_state_geojson.py`:
+  - Downloads official Australian state boundaries from Natural Earth
+  - Extracts NSW and QLD boundaries to separate GeoJSON files
+  - Creates placeholder `data/australian_states.geojson`
+
+#### Python/ODC Processing Module
+- Created `src/aus_land_clearing/dea_processor.py`:
+  - `load_aoi()`: Load GeoJSON area of interest with optional buffering
+  - `load_dea_config()`: Load DEA configuration from YAML
+  - `fetch_dea_landcover()`: Fetch DEA annual landcover via STAC/datacube API
+  - `reclassify_dea_to_woody_nonwoody()`: Reclassify DEA classes to simplified scheme
+  - `export_yearly_geotiff()`: Clip and export per-year GeoTIFFs
+  - `create_animation()`: Generate animated GIF from yearly outputs
+  - Comprehensive docstrings and type hints throughout
+  - Error handling and logging
+- Created `scripts/run_dea_processing.py`:
+  - Command-line interface for DEA processing
+  - Support for state selection (NSW, QLD, or both)
+  - Configurable time range and buffering options
+  - Processes both states by default for full time period (1988-present)
+
+#### Google Earth Engine Template
+- Created `gee/dea_annual_landcover_nsw_qld.js`:
+  - Google Earth Engine JavaScript template
+  - Loads DEA-compatible annual landcover or ESA WorldCover fallback
+  - Configurable export to Google Drive or Earth Engine Assets
+  - Reclassification logic for woody/non-woody mapping
+  - Detailed inline instructions and documentation
+  - NSW and QLD geometry definitions
+
+#### Testing Infrastructure
+- Created `tests/` directory with testing scaffold
+- Created `tests/test_dea_processor.py`:
+  - Unit tests for all core DEA processor functions
+  - Mocked tests to avoid external dependencies
+  - Test coverage for reclassification logic
+  - Test coverage for AOI loading and buffering
+  - pytest fixtures for reusable test data
+
+#### Requirements and Dependencies
+- Updated `requirements.txt` with new dependencies:
+  - `datacube>=1.8.0` - Open Data Cube for DEA access
+  - `odc-stac>=0.3.0` - STAC-based data access
+  - `imageio>=2.9.0` - GIF animation generation
+  - Maintained compatibility with existing dependencies
+
+#### Examples and Notebooks
+- Created `notebooks/0-demo-dea-processing.ipynb`:
+  - Workflow demonstration notebook
+  - Step-by-step guide to using DEA processing scripts
+  - Visualization of processing outputs
+  - Example of loading and inspecting results
+  - Troubleshooting section
+
+### Technical Implementation Notes
+- All code follows PEP 8 style guidelines
+- Comprehensive docstrings using NumPy style
+- Type hints for better code clarity
+- Modular design allowing easy extension in future sweeps
+- No large binary data files committed to repository
+- Template-based approach for user customization
+
 ### Planned Features
 - Actual DEA datacube integration examples
 - SLATS data download automation
