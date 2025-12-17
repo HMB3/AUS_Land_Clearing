@@ -46,7 +46,10 @@
 var STATE = 'NSW';  // Options: 'NSW', 'QLD', or 'BOTH'
 
 // Time period
-var START_YEAR = 2020;  // Note: ESA WorldCover available from 2020
+// Note: Update these values as new data becomes available
+// ESA WorldCover: 2020-2021 (current available years)
+// For full Landsat record (1988-present), use Python/ODC route with DEA data
+var START_YEAR = 2020;
 var END_YEAR = 2023;
 
 // Export settings

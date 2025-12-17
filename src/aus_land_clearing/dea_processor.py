@@ -62,8 +62,7 @@ try:
 except ImportError:
     HAS_DATACUBE = False
 
-# Configure logging
-logging.basicConfig(level=logging.INFO)
+# Configure logging (can be overridden by user)
 logger = logging.getLogger(__name__)
 
 
@@ -425,15 +424,18 @@ def reclassify_dea_to_woody_nonwoody(
     # Extract numpy array from xarray if needed
     if isinstance(data, xr.Dataset):
         # Try common variable names
+        if len(data.data_vars) == 0:
+            raise ValueError("Dataset has no data variables")
+        
         for var_name in ['landcover_class', 'landcover', 'level_4', 'classification']:
             if var_name in data.data_vars:
                 arr = data[var_name].values
                 break
         else:
-            raise ValueError(
-                f"Could not find landcover variable in dataset. "
-                f"Available: {list(data.data_vars.keys())}"
-            )
+            # Use first available variable if no standard name found
+            first_var = list(data.data_vars.keys())[0]
+            logger.warning(f"Using non-standard variable name: {first_var}")
+            arr = data[first_var].values
     elif isinstance(data, xr.DataArray):
         arr = data.values
     else:
