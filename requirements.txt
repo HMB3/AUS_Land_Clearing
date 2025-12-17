@@ -36,3 +36,6 @@ ipywidgets>=7.6.0
 pyyaml>=5.4.0
 tqdm>=4.62.0
 requests>=2.26.0
+
+# Testing
+pytest>=7.0.0
