@@ -170,6 +170,9 @@ pytest tests/test_processing.py
 
 # Run with coverage
 pytest --cov=aus_land_clearing tests/
+
+# Run DEA processor tests specifically
+pytest tests/test_dea_processor.py -v
 ```
 
 ### Writing Tests
@@ -178,6 +181,7 @@ pytest --cov=aus_land_clearing tests/
 - Name test files `test_*.py`
 - Use descriptive test names
 - Test edge cases and error conditions
+- For DEA processing, use mocked data to avoid external dependencies
 
 Example:
 ```python
@@ -186,6 +190,160 @@ def test_extract_time_series_empty_dataset():
     ds = xr.Dataset()
     result = extract_time_series(ds, variable='PV')
     assert result.empty
+```
+
+### Testing DEA Processing
+
+The DEA processor tests use mocked datacube responses to avoid requiring actual DEA credentials:
+
+```python
+# Example test structure
+def test_dea_processor_reclassify():
+    """Test DEA class reclassification to woody/non-woody."""
+    # Mock DEA classes
+    input_classes = np.array([[1, 2, 3], [4, 5, 6]])
+    
+    # Apply reclassification
+    result = reclassify_dea_to_woody_nonwoody(input_classes)
+    
+    # Check output
+    assert result.shape == input_classes.shape
+    assert set(np.unique(result)).issubset({0, 1, 2})
+```
+
+### Adding New Data Sources
+
+When adding support for new data sources or processing capabilities:
+
+1. **Add configuration** to `config.yaml`:
+   ```yaml
+   new_data_source:
+     product_id: "source_product_name"
+     start_year: 1988
+     end_year: 2024
+     # ... other parameters
+   ```
+
+2. **Create loader function** in appropriate module:
+   ```python
+   # In src/aus_land_clearing/data/ or new module
+   def load_new_data_source(bbox, time_range, **kwargs):
+       """
+       Load data from new source.
+       
+       Parameters
+       ----------
+       bbox : tuple
+           Bounding box (min_lon, min_lat, max_lon, max_lat)
+       time_range : tuple
+           Time range (start_date, end_date)
+       
+       Returns
+       -------
+       xarray.Dataset
+           Loaded data
+       """
+       # Implementation
+       pass
+   ```
+
+3. **Add tests** with mocked responses:
+   ```python
+   # In tests/test_new_data_source.py
+   @pytest.fixture
+   def mock_data():
+       """Mock data for testing."""
+       return create_mock_dataset()
+   
+   def test_load_new_data_source(mock_data):
+       """Test loading from new data source."""
+       result = load_new_data_source(bbox, time_range)
+       assert result is not None
+   ```
+
+4. **Update documentation**:
+   - Add to `docs/DATA_SOURCES.md`
+   - Add example to notebooks
+   - Update README.md
+
+5. **Create example script** in `scripts/` if appropriate
+
+### Adding Processing Functions
+
+When adding new processing capabilities:
+
+1. **Create well-documented function**:
+   ```python
+   def new_processing_function(
+       data: xr.Dataset,
+       param1: str,
+       param2: int = 10
+   ) -> xr.Dataset:
+       """
+       Brief description of what this function does.
+       
+       Parameters
+       ----------
+       data : xarray.Dataset
+           Input dataset
+       param1 : str
+           Description of param1
+       param2 : int, optional
+           Description of param2, by default 10
+       
+       Returns
+       -------
+       xarray.Dataset
+           Processed dataset
+           
+       Examples
+       --------
+       >>> ds = load_data()
+       >>> result = new_processing_function(ds, 'value')
+       """
+       # Implementation
+       pass
+   ```
+
+2. **Add comprehensive tests**:
+   - Test with valid inputs
+   - Test with edge cases
+   - Test error handling
+   - Test with different data types
+
+3. **Add to module exports**:
+   ```python
+   # In module __init__.py
+   from .module import new_processing_function
+   
+   __all__ = ['new_processing_function', ...]
+   ```
+
+4. **Document in notebook** with example usage
+
+### Data Quality Checks
+
+When processing external data sources, include quality checks:
+
+```python
+def validate_dea_data(ds: xr.Dataset) -> bool:
+    """
+    Validate DEA data quality.
+    
+    Checks:
+    - Data arrays are not empty
+    - CRS information is present
+    - Time dimension is valid
+    - No excessive missing data
+    """
+    if len(ds.data_vars) == 0:
+        raise ValueError("Dataset is empty")
+    
+    if 'time' not in ds.dims:
+        raise ValueError("Missing time dimension")
+    
+    # Additional checks...
+    return True
 ```
 
 ## Code Review Process

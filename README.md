@@ -37,12 +37,23 @@ AUS_Land_Clearing/
 │   ├── data/                  # Data access modules
 │   ├── processing/            # Time-series processing
 │   ├── visualization/         # Visualization tools
-│   └── utils/                 # Configuration and utilities
+│   ├── utils/                 # Configuration and utilities
+│   └── dea_processor.py       # DEA annual landcover processor
+├── scripts/                   # Processing scripts
+│   ├── run_dea_processing.py  # Run DEA landcover processing
+│   └── fetch_australian_state_geojson.py  # Download state boundaries
+├── gee/                       # Google Earth Engine scripts
+│   └── dea_annual_landcover_nsw_qld.js  # GEE export template
 ├── data/                      # Data storage
 │   ├── raw/                   # Raw data downloads
 │   ├── processed/             # Processed datasets
-│   └── outputs/               # Generated outputs
+│   ├── outputs/               # Generated outputs
+│   ├── nsw.geojson           # NSW boundary
+│   └── qld.geojson           # QLD boundary
 ├── notebooks/                 # Jupyter notebooks for analysis
+│   └── 0-demo-dea-processing.ipynb  # DEA workflow demo
+├── tests/                     # Unit tests
+│   └── test_dea_processor.py  # DEA processor tests
 ├── docs/                      # Documentation
 ├── config.yaml                # Configuration file
 └── requirements.txt           # Python dependencies
@@ -89,6 +100,158 @@ The project uses a YAML configuration file (`config.yaml`) to manage settings:
 - **Output Settings**: Animation parameters, figure formats
 
 Edit `config.yaml` to customize these settings for your analysis.
+
+## DEA Annual Landcover Processing
+
+This repository now includes comprehensive support for processing **Digital Earth Australia (DEA) Annual Landcover** products to produce woody/non-woody vegetation classifications for NSW and Queensland from 1988 to present.
+
+### What is DEA Annual Landcover?
+
+DEA Annual Landcover is an authoritative Australia-wide land cover classification product produced by Geoscience Australia. It provides:
+- **Coverage**: Continental Australia
+- **Resolution**: 25m spatial resolution
+- **Temporal**: Annual composites from 1988 to present
+- **Classes**: Multiple land cover classes including woody vegetation, crops, urban, water, bare soil
+- **Source**: Landsat satellite imagery processed through the Open Data Cube
+- **Documentation**: https://www.dea.ga.gov.au/products/dea-land-cover
+
+### Processing Routes
+
+This repository provides **two processing routes** for DEA Annual Landcover:
+
+#### 1. Python/Open Data Cube Route (Recommended for production)
+- Uses `datacube` and `odc-stac` Python libraries
+- Access data via DEA's STAC catalog or local datacube instance
+- Full control over processing pipeline
+- Suitable for batch processing and automation
+- See `scripts/run_dea_processing.py` and `src/aus_land_clearing/dea_processor.py`
+
+#### 2. Google Earth Engine Route (Alternative for cloud processing)
+- Uses Google Earth Engine JavaScript API
+- Cloud-based processing and export
+- Exports to Google Drive or Earth Engine Assets
+- Good for interactive exploration and prototyping
+- See `gee/dea_annual_landcover_nsw_qld.js`
+
+### Required Credentials and Setup
+
+**For Python/ODC Route:**
+```bash
+# Install DEA dependencies
+pip install datacube odc-stac pystac-client
+
+# Option A: Use DEA STAC catalog (no authentication required)
+# The scripts default to this method
+
+# Option B: Set up local Open Data Cube (advanced)
+datacube system init
+# Follow DEA datacube setup guide: https://knowledge.dea.ga.gov.au/
+```
+
+**For Google Earth Engine Route:**
+```bash
+# Install Earth Engine
+pip install earthengine-api
+
+# Authenticate (one-time setup)
+earthengine authenticate
+
+# Initialize in your script
+import ee
+ee.Initialize()
+```
+
+### Step-by-Step Workflow
+
+#### Step 1: Fetch Study Area Boundaries
+
+Download official Australian state boundaries:
+
+```bash
+python scripts/fetch_australian_state_geojson.py
+```
+
+This creates:
+- `data/nsw.geojson` - New South Wales boundary
+- `data/qld.geojson` - Queensland boundary
+- `data/australian_states.geojson` - All states (reference)
+
+#### Step 2: Configure Processing Parameters
+
+Edit `config.yaml` to customize the DEA processing profile:
+
+```yaml
+dea_annual_landcover:
+  product_id: "ga_ls_landcover_class_cyear_2"
+  start_year: 1988
+  end_year: 2024
+  crs: "EPSG:3577"  # Australian Albers
+  resolution: 25
+  output_dir: "data/outputs/dea_landcover"
+  # ... see config.yaml for full options
+```
+
+#### Step 3: Run Processing (Python Route)
+
+Process DEA data for NSW and QLD:
+
+```bash
+# Process both states for full time period (1988-present)
+python scripts/run_dea_processing.py
+
+# Process specific state and time range
+python scripts/run_dea_processing.py --state nsw --start-year 2000 --end-year 2020
+
+# Add buffer around state boundary (reduces edge artifacts)
+python scripts/run_dea_processing.py --buffer 5000  # 5km buffer
+```
+
+This produces:
+- `data/outputs/dea_landcover/nsw/landcover_1988.tif` (and one per year)
+- `data/outputs/dea_landcover/qld/landcover_1988.tif` (and one per year)
+- `data/outputs/dea_landcover/nsw/animation.gif` (animated time series)
+- `data/outputs/dea_landcover/qld/animation.gif` (animated time series)
+
+#### Step 4: View Results
+
+Open the demonstration notebook:
+
+```bash
+jupyter notebook notebooks/0-demo-dea-processing.ipynb
+```
+
+### Class Mapping: DEA to Woody/Non-Woody
+
+The processing scripts reclassify DEA's detailed land cover classes into a simplified woody/non-woody scheme:
+
+| Output Class | Value | DEA Source Classes |
+|--------------|-------|-------------------|
+| Woody vegetation | 1 | Woody vegetation (dense, sparse), Forest |
+| Non-woody vegetation | 2 | Grassland, Cropland, Wetland vegetation |
+| Other/Masked | 0 | Water, Bare soil, Urban, Clouds, No data |
+
+You can customize this mapping in `config.yaml` under `dea_annual_landcover.classes_map`.
+
+### Recommended Sweeps
+
+**Sweep 1 (Current)**: Template scripts and core functionality
+- ✅ Documentation and configuration
+- ✅ Python processing module (`dea_processor.py`)
+- ✅ Runnable scripts with AOI support
+- ✅ GEE JavaScript template
+- ✅ Basic unit tests
+
+**Sweep 2 (Planned)**: Enhanced processing and validation
+- Improve STAC/datacube data fetching with error handling
+- Add data quality checks and cloud masking
+- Validate outputs against reference datasets
+- Performance optimization for large areas
+
+**Sweep 3 (Planned)**: Visualization and analysis
+- Enhanced animation generation with legends and annotations
+- R scripts for publication-quality figures
+- Change detection analysis (clearing events, regrowth)
+- Integration with narrative visualization tools
 
 ## Usage
 

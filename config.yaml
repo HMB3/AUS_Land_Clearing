@@ -78,6 +78,94 @@ data_sources:
     coverage: "Global"
     cloud_processing: true
 
+# DEA Annual Landcover Processing Configuration
+dea_annual_landcover:
+  # DEA product identifier for annual landcover
+  product_id: "ga_ls_landcover_class_cyear_2"
+  
+  # Alternative product identifiers (for reference)
+  # product_id_v1: "ga_ls_landcover_class_cyear_1"  # Older version
+  
+  # Time period for processing
+  start_year: 1988
+  end_year: 2024
+  
+  # Coordinate Reference System
+  # EPSG:3577 = Australian Albers Equal Area projection (recommended for Australia-wide analysis)
+  # EPSG:4326 = WGS84 (lat/lon) - use for global compatibility
+  crs: "EPSG:3577"
+  
+  # Output resolution in meters (DEA native is 25m)
+  resolution: 25
+  
+  # Output directory for processed GeoTIFFs
+  output_dir: "data/outputs/dea_landcover"
+  
+  # Area of Interest (AOI) paths
+  aoi_paths:
+    nsw: "data/nsw.geojson"
+    qld: "data/qld.geojson"
+  
+  # Class mapping: DEA land cover classes to woody/non-woody
+  # Output scheme: 0=other/masked, 1=woody vegetation, 2=non-woody vegetation
+  # 
+  # DEA Land Cover Classes (reference):
+  # 1 = Cultivated Terrestrial Vegetated
+  # 2 = Natural Terrestrial Vegetated
+  # 3 = Natural Aquatic Vegetated  
+  # 4 = Artificial Surface
+  # 5 = Natural Bare Surface
+  # 6 = Water
+  # 7-10 = Additional classes (varies by version)
+  #
+  # This mapping is conservative - adjust based on your analysis needs
+  classes_map:
+    # Woody vegetation (forests, woodlands, dense shrubs)
+    woody:
+      - 2  # Natural Terrestrial Vegetated (includes woody)
+      # Note: DEA landcover has hierarchical levels; for detailed mapping,
+      # use the level-4 product which distinguishes woody from herbaceous
+    
+    # Non-woody vegetation (grasslands, crops, wetlands)
+    non_woody:
+      - 1  # Cultivated Terrestrial Vegetated (crops, pasture)
+      - 3  # Natural Aquatic Vegetated (wetlands)
+    
+    # Other/masked (water, urban, bare, clouds, nodata)
+    other:
+      - 4  # Artificial Surface (urban, built-up)
+      - 5  # Natural Bare Surface (bare soil, rock)
+      - 6  # Water
+      - 0  # No data / masked pixels
+  
+  # STAC (SpatioTemporal Asset Catalog) configuration
+  # DEA data can be accessed via STAC without requiring datacube installation
+  stac:
+    catalog_url: "https://explorer.dea.ga.gov.au/stac"
+    collection: "ga_ls_landcover_class_cyear_2"
+    fallback_catalog: "https://earth-search.aws.element84.com/v1"  # AWS backup
+  
+  # Processing options
+  processing:
+    # Buffer distance around AOI in meters (reduces edge artifacts)
+    buffer_distance: 0  # Set to 5000 for 5km buffer
+    
+    # Chunk size for dask processing (pixels)
+    chunk_size: 2048
+    
+    # Cloud masking (if available in product)
+    apply_cloud_mask: true
+    
+    # Nodata value for output GeoTIFFs
+    nodata_value: 255
+  
+  # Animation settings for GIF output
+  animation:
+    fps: 2  # Frames per second
+    duration: 10  # Total duration in seconds (overrides fps if both set)
+    loop: 0  # 0 = infinite loop
+    optimize: true  # Optimize file size
+
 # Output Configuration
 outputs:
   formats:
