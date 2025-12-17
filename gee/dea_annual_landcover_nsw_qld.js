@@ -119,13 +119,16 @@ function processLandsatWoody(year, region, regionName) {
     .filterDate(year + '-01-01', year + '-12-31')
     .filter(ee.Filter.lt('CLOUD_COVER', 30));
   
-  if (landsat.size().getInfo() === 0) {
-    print('No Landsat data for ' + year);
-    return null;
-  }
+  // Check if collection has data (server-side)
+  var hasData = landsat.size().gt(0);
   
-  // Calculate median composite
-  var composite = landsat.median();
+  // Calculate median composite conditionally
+  var composite = ee.Algorithms.If(
+    hasData,
+    landsat.median(),
+    ee.Image.constant(0)  // Return empty image if no data
+  );
+  composite = ee.Image(composite);
   
   // Calculate NDVI (simple woody vegetation proxy)
   var ndvi = composite.normalizedDifference(['SR_B5', 'SR_B4'])
@@ -140,7 +143,8 @@ function processLandsatWoody(year, region, regionName) {
     'year': year,
     'region': regionName,
     'source': 'Landsat 8',
-    'system:time_start': ee.Date.fromYMD(year, 1, 1).millis()
+    'system:time_start': ee.Date.fromYMD(year, 1, 1).millis(),
+    'hasData': hasData
   });
   
   return woody;
@@ -172,6 +176,7 @@ function processRegionTimeSeries(region, regionName, startYear, endYear) {
       }
       
       // Fallback to Landsat-based classification (2013+ for Landsat 8)
+      // Note: removed null check since processLandsatWoody now always returns an image
       if (!woody && year >= 2013) {
         woody = processLandsatWoody(year, region, regionName);
       }

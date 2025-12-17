@@ -301,6 +301,9 @@ def create_animation(
             if np.isnan(data_min) or np.isnan(data_max):
                 # All NaN
                 normalized = np.zeros_like(data, dtype=np.uint8)
+            elif data_max - data_min == 0:
+                # Uniform data - use middle gray value
+                normalized = np.full_like(data, 128, dtype=np.uint8)
             else:
                 # Normalize to 0-255
                 normalized = np.where(

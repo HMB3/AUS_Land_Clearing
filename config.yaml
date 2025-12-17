@@ -123,15 +123,16 @@ dea_profile:
   
   # DEA Land Cover class mapping to woody/non-woody
   # Based on DEA Land Cover classes (Level 3)
+  # Note: This is a simplified binary classification for land clearing analysis
   classes_map:
-    # Woody vegetation classes
+    # Woody vegetation classes (trees and shrubs)
     woody:
       - 111  # Cultivated terrestrial vegetated - Woody crops
-      - 112  # Cultivated terrestrial vegetated - Herbaceous crops (includes some woody)
       - 124  # Natural terrestrial vegetated - Woody
-      - 125  # Natural terrestrial vegetated - Herbaceous
     # Non-woody and other classes
     non_woody:
+      - 112  # Cultivated terrestrial vegetated - Herbaceous crops
+      - 125  # Natural terrestrial vegetated - Herbaceous
       - 211  # Natural aquatic vegetated - Herbaceous
       - 212  # Artificial surface - Buildings
       - 213  # Artificial surface - Roads
