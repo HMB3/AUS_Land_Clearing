@@ -10,11 +10,11 @@ import pytest
 import sys
 from pathlib import Path
 
-# Add src to path
+# Add src to path and import dea_processor directly
 repo_root = Path(__file__).parent.parent
-sys.path.insert(0, str(repo_root / "src"))
+sys.path.insert(0, str(repo_root / "src" / "aus_land_clearing"))
 
-from aus_land_clearing.dea_processor import reclassify_dea_classes
+import dea_processor
 
 
 class TestReclassifyDEAClasses:
@@ -34,7 +34,7 @@ class TestReclassifyDEAClasses:
         # Expected output: woody=1, non-woody=0
         expected = np.array([[1, 1], [0, 0]], dtype=np.float32)
         
-        result = reclassify_dea_classes(data, classes_map)
+        result = dea_processor.reclassify_dea_classes(data, classes_map)
         
         np.testing.assert_array_equal(result, expected)
     
@@ -49,7 +49,7 @@ class TestReclassifyDEAClasses:
         
         expected = np.array([[1, 0], [1, 0], [1, 0]], dtype=np.float32)
         
-        result = reclassify_dea_classes(data, classes_map)
+        result = dea_processor.reclassify_dea_classes(data, classes_map)
         
         np.testing.assert_array_equal(result, expected)
     
@@ -62,7 +62,7 @@ class TestReclassifyDEAClasses:
             'non_woody': [214, 215]
         }
         
-        result = reclassify_dea_classes(data, classes_map)
+        result = dea_processor.reclassify_dea_classes(data, classes_map)
         
         # Check that known classes are correct
         assert result[0, 0] == 1
@@ -82,7 +82,7 @@ class TestReclassifyDEAClasses:
             'non_woody': [214, 215]
         }
         
-        result = reclassify_dea_classes(data, classes_map)
+        result = dea_processor.reclassify_dea_classes(data, classes_map)
         
         # Check output shape matches input
         assert result.shape == data.shape
@@ -100,7 +100,7 @@ class TestReclassifyDEAClasses:
             'non_woody': []
         }
         
-        result = reclassify_dea_classes(data, classes_map)
+        result = dea_processor.reclassify_dea_classes(data, classes_map)
         
         # All values should be NaN
         assert np.all(np.isnan(result))
@@ -114,7 +114,7 @@ class TestReclassifyDEAClasses:
             'non_woody': []
         }
         
-        result = reclassify_dea_classes(data, classes_map)
+        result = dea_processor.reclassify_dea_classes(data, classes_map)
         
         # Woody classes should be 1, others NaN
         assert result[0, 0] == 1
@@ -131,7 +131,7 @@ class TestReclassifyDEAClasses:
             'non_woody': [214, 215]
         }
         
-        result = reclassify_dea_classes(data, classes_map)
+        result = dea_processor.reclassify_dea_classes(data, classes_map)
         
         # Non-woody classes should be 0, others NaN
         assert np.isnan(result[0, 0])
@@ -148,7 +148,7 @@ class TestReclassifyDEAClasses:
             'non_woody': []
         }
         
-        result = reclassify_dea_classes(data, classes_map)
+        result = dea_processor.reclassify_dea_classes(data, classes_map)
         
         assert result.dtype == np.float32
 

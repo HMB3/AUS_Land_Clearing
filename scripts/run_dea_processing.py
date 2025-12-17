@@ -24,11 +24,11 @@ import sys
 import argparse
 from pathlib import Path
 
-# Add src to path
+# Add src to path and import dea_processor directly
 repo_root = Path(__file__).parent.parent
-sys.path.insert(0, str(repo_root / "src"))
+sys.path.insert(0, str(repo_root / "src" / "aus_land_clearing"))
 
-from aus_land_clearing.dea_processor import process_dea_timeseries, load_config
+import dea_processor
 
 
 def parse_args():
@@ -106,7 +106,7 @@ def main():
     print("=" * 70)
     
     # Load config to get year range
-    config = load_config(args.config)
+    config = dea_processor.load_config(args.config)
     dea_config = config['dea_profile']
     
     # Determine years to process
@@ -150,7 +150,7 @@ def main():
     for state in states:
         try:
             print("=" * 70)
-            result = process_dea_timeseries(
+            result = dea_processor.process_dea_timeseries(
                 state_code=state,
                 config_path=args.config,
                 years=years
