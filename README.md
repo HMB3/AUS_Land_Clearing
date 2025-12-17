@@ -92,7 +92,63 @@ Edit `config.yaml` to customize these settings for your analysis.
 
 ## Usage
 
-### Option 1: Using DEA (Australia-specific)
+### Quick Start: DEA Annual Land Cover Processing
+
+This repository includes templates and scripts for processing Digital Earth Australia (DEA) annual land cover products for NSW and QLD (1988–present).
+
+#### Step 1: Download State Boundaries
+
+```bash
+python scripts/fetch_australian_state_geojson.py
+```
+
+This downloads NSW and QLD boundaries from GADM and saves them as GeoJSON files.
+
+#### Step 2: Run DEA Processing
+
+```bash
+# Process all years for both states
+python scripts/run_dea_processing.py
+
+# Process only NSW
+python scripts/run_dea_processing.py --state nsw
+
+# Process specific year range
+python scripts/run_dea_processing.py --years 2020-2023
+```
+
+**Note**: The data fetching backend (`fetch_dea_raster_for_year()`) is a template function that needs to be implemented with your preferred method:
+- Open Data Cube (ODC) - if you have a datacube instance
+- STAC API - using `odc-stac` and `pystac_client`
+- Direct download - from DEA's data repository
+
+See `src/aus_land_clearing/dea_processor.py` for implementation guidance.
+
+#### Step 3: Explore in Notebook
+
+Open `notebooks/0-demo-dea-processing.ipynb` for an interactive walkthrough.
+
+### Processing Routes
+
+This repository provides **two complementary processing routes**:
+
+#### Route 1: Python / Open Data Cube (Recommended for DEA)
+- **Best for**: Native DEA product access, reproducible workflows, batch processing
+- **Tools**: Python, datacube, odc-stac, rasterio, xarray
+- **Data sources**: DEA Land Cover, DEA Fractional Cover via ODC or STAC
+- **Scripts**: `scripts/run_dea_processing.py`, `src/aus_land_clearing/dea_processor.py`
+- **Status**: Template implemented (sweep-1), data fetching to be completed (sweep-2)
+
+#### Route 2: Google Earth Engine (Alternative for Global Data)
+- **Best for**: Cloud-based processing, global datasets, quick exploration
+- **Tools**: JavaScript, Google Earth Engine Code Editor
+- **Data sources**: ESA WorldCover, Dynamic World, Landsat (DEA not directly available in GEE)
+- **Scripts**: `gee/dea_annual_landcover_nsw_qld.js`
+- **Status**: Template provided with alternative datasets
+
+### Advanced Usage
+
+#### Option 1: Using DEA (Australia-specific)
 
 ```python
 from aus_land_clearing import (
@@ -115,7 +171,7 @@ ts = extract_time_series(ds, variable='PV', method='mean')
 ts.to_csv('outputs/vegetation_timeseries.csv', index=False)
 ```
 
-### Option 2: Using Google Earth Engine (Global)
+#### Option 2: Using Google Earth Engine (Global)
 
 ```python
 from aus_land_clearing.data import (
@@ -197,6 +253,50 @@ Check the `notebooks/` directory for example workflows:
 
 ## Data Access Setup
 
+### Required Credentials and Setup
+
+#### For DEA Processing (Python/ODC Route)
+
+**Option A: Open Data Cube (Local/Server)**
+
+If you have access to a server with DEA datacube configured:
+
+1. Install datacube:
+   ```bash
+   pip install datacube
+   ```
+
+2. Configure datacube connection (if needed):
+   ```bash
+   datacube system init
+   ```
+
+3. Check available products:
+   ```bash
+   datacube product list | grep landcover
+   ```
+
+**Option B: STAC API (Recommended for Most Users)**
+
+No credentials required for read-only access:
+
+1. Install STAC libraries:
+   ```bash
+   pip install odc-stac pystac-client
+   ```
+
+2. Access DEA STAC catalog:
+   ```python
+   from pystac_client import Client
+   catalog = Client.open('https://explorer.dea.ga.gov.au/stac/')
+   ```
+
+3. No authentication needed for public DEA data
+
+**Option C: Direct Download**
+
+Download GeoTIFFs directly from DEA's data repository. See DEA documentation for access details.
+
 ### DEA Setup (Australia)
 
 1. **DEA Datacube**: Install and configure Open Data Cube
@@ -242,6 +342,34 @@ This repository follows key principles:
 3. **Dual capability** - Both DEA (authoritative Australian data) and GEE (global transferability)
 4. **Basic plotting only** - Advanced visualization happens in dedicated tools/repos
 5. **Build, don't discard** - Extend existing work rather than replacing it
+
+## Recommended Next Steps (Future Sweeps)
+
+### Sweep-2: Implement Data Fetching Backend
+- Implement `fetch_dea_raster_for_year()` using ODC or STAC
+- Add connection configuration and authentication
+- Test with real DEA annual land cover data
+- Add error handling and retry logic
+- Implement data caching for efficiency
+
+### Sweep-3: Enhanced Processing
+- Add parallel processing for multiple years
+- Implement progress tracking and logging
+- Add validation checks for output quality
+- Extend to additional states (VIC, SA, WA)
+- Add support for sub-annual temporal resolution
+
+### Sweep-4: Advanced Visualizations
+- Interactive web-based visualizations
+- Enhanced animation options (MP4, WebM)
+- Comparison tools (before/after, state-to-state)
+- Integration with narrative visualization platforms
+
+### Sweep-5: Production Deployment
+- Containerization (Docker)
+- Cloud deployment guides (AWS, NCI)
+- Automated CI/CD pipeline
+- Performance optimization for large-scale processing
 
 ## References
 
