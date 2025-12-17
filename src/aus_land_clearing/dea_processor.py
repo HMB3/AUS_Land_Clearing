@@ -343,9 +343,9 @@ def _create_mock_dea_data(
     width = int((bounds[2] - bounds[0]) / resolution)
     height = int((bounds[3] - bounds[1]) / resolution)
     
-    # Limit size for mock data
-    width = min(width, 100)
-    height = min(height, 100)
+    # Limit size for mock data, ensure at least 2x2 grid
+    width = max(2, min(width, 100))
+    height = max(2, min(height, 100))
     
     # Create coordinate arrays
     x = np.linspace(bounds[0], bounds[2], width)
@@ -513,9 +513,28 @@ def export_yearly_geotiff(
     
     # Extract year data if time dimension present
     if 'time' in data.dims and len(data.time) > 1:
-        # Select closest time to target year
-        target_time = f'{year}-07-01'
-        year_data = data.sel(time=target_time, method='nearest')
+        # Select data for target year
+        # Handle both datetime and string time coordinates
+        try:
+            # Try direct selection first
+            target_time = f'{year}-07-01'
+            year_data = data.sel(time=target_time, method='nearest')
+        except (KeyError, TypeError):
+            # Fallback: select by index based on year
+            time_values = data.time.values
+            # Find index matching year
+            year_idx = None
+            for idx, t in enumerate(time_values):
+                t_str = str(t)
+                if str(year) in t_str:
+                    year_idx = idx
+                    break
+            
+            if year_idx is not None:
+                year_data = data.isel(time=year_idx)
+            else:
+                logger.warning(f"Could not find data for year {year}, using first time step")
+                year_data = data.isel(time=0)
     else:
         year_data = data
     
